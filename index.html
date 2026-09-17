@@ -1,603 +1,675 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>신조어 퀴즈</title>
-  <style>
-    :root {
-      --bg: #f8f3e8;
-      --line: #e9dfc7;
-      --card: #fffaf7;
-      --pink: #ffd8e3;
-      --pink-strong: #ff95b3;
-      --mint: #d8f3e8;
-      --yellow: #ffe9a9;
-      --blue: #d9ebff;
-      --text: #2d2a26;
-      --sub: #746a63;
-      --green: #27ae60;
-      --red: #e74c3c;
-      --shadow: 0 8px 24px rgba(0,0,0,0.08);
-      --radius: 24px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스도쿠 게임</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+:root {
+    --font-family: 'Noto Sans KR', sans-serif;
+    --bg-color: #f4f7f9;
+    --text-color: #3d4852;
+    --header-text-color: #2c3e50;
+    --primary-color: #3498db;
+    --primary-gradient: linear-gradient(135deg, #3498db, #2980b9);
+    --accent-color: #f39c12;
+    --accent-gradient: linear-gradient(135deg, #f39c12, #e67e22);
+    --submit-gradient: linear-gradient(135deg, #2ecc71, #28b463);
+    --card-bg-color: #ffffff;
+    --grid-border-color: #dce4e9;
+    --grid-sub-border-color: #8ea4b3;
+    --given-cell-bg: #eaf2f8;
+    --given-cell-text: #34495e;
+    --input-cell-text: var(--primary-color);
+    --incorrect-cell-bg: #fff0f0;
+    --incorrect-cell-text: #e74c3c;
+    --solution-flash-text: #27ae60;
+    --card-shadow: 0 6px 15px rgba(60, 70, 80, 0.12);
+    --win-colors: #3498db, #e74c3c, #f1c40f, #2ecc71, #9b59b6;
+}
 
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: "Arial", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-      color: var(--text);
-      background:
-        repeating-linear-gradient(
-          to bottom,
-          var(--bg) 0px,
-          var(--bg) 50px,
-          var(--line) 50px,
-          var(--line) 52px
-        );
-    }
+body.dark-mode {
+    --bg-color: #1c2128;
+    --text-color: #cdd5de;
+    --header-text-color: #ffffff;
+    --primary-color: #3498db;
+    --accent-color: #f39c12;
+    --card-bg-color: #252b33;
+    --grid-border-color: #3a444f;
+    --grid-sub-border-color: #788ca3;
+    --given-cell-bg: #2c3a47;
+    --given-cell-text: #bdc3c7;
+    --input-cell-text: #5dade2;
+    --incorrect-cell-bg: #4a2525;
+    --incorrect-cell-text: #f1948a;
+    --solution-flash-text: #2ecc71;
+    --card-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
 
-    .wrap {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    transition: background-color 0.3s, color 0.3s;
+    margin: 0;
+}
 
-    .app {
-      width: min(1100px, 100%);
-      display: grid;
-      grid-template-columns: 1.02fr 1fr;
-      gap: 28px;
-      align-items: center;
-    }
+.app-header {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
 
-    .phone {
-      background: var(--card);
-      border: 10px solid #f7c6d5;
-      border-radius: 34px;
-      box-shadow: var(--shadow);
-      padding: 18px 18px 24px;
-      max-width: 430px;
-      margin: 0 auto;
-    }
+h1 {
+    color: var(--header-text-color);
+    font-weight: 700;
+    margin: 0;
+}
 
-    .phone-inner {
-      background: #fff;
-      border-radius: 24px;
-      padding: 18px;
-      min-height: 700px;
-      display: flex;
-      flex-direction: column;
-    }
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 25px;
+    align-items: center;
+    background-color: var(--card-bg-color);
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+}
 
-    .title {
-      text-align: center;
-      margin-bottom: 16px;
-    }
-    .title h1 {
-      margin: 4px 0 8px;
-      font-size: clamp(28px, 4vw, 42px);
-      color: #ff7a8f;
-      line-height: 1.1;
-    }
-    .title p {
-      margin: 0;
-      color: var(--sub);
-      font-size: 15px;
-    }
+.select-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 
-    .status {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-    .pill {
-      flex: 1;
-      background: #fff3f6;
-      border: 1.5px solid #f3d5dd;
-      border-radius: 14px;
-      padding: 10px 12px;
-      color: #b05574;
-      font-weight: 700;
-      text-align: center;
-      font-size: 14px;
-    }
+select, button {
+    font-family: var(--font-family);
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background-color: var(--card-bg-color);
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease-in-out;
+}
 
-    .card {
-      background: linear-gradient(135deg, #ffc4d0, #ffe89a);
-      border-radius: 18px;
-      padding: 26px 18px;
-      text-align: center;
-      margin-bottom: 16px;
-      min-height: 180px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-    .card .qno {
-      color: #7d6a5b;
-      font-size: 13px;
-      margin-bottom: 10px;
-      font-weight: 700;
-    }
-    .card .word {
-      font-size: clamp(34px, 6vw, 48px);
-      font-weight: 900;
-      margin-bottom: 14px;
-    }
-    .card .hint {
-      color: #6c5d53;
-      font-size: 15px;
-      line-height: 1.5;
-    }
+select {
+    border-color: var(--grid-border-color);
+}
 
-    .choices {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-    .choice {
-      border: none;
-      border-radius: 14px;
-      background: #f8eeee;
-      padding: 15px 10px;
-      font-size: 16px;
-      font-weight: 700;
-      color: #564b46;
-      cursor: pointer;
-      transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.04);
-    }
-    .choice:hover:not(:disabled) {
-      transform: translateY(-2px);
-      background: #fce5eb;
-    }
-    .choice:disabled { cursor: default; opacity: 0.98; }
-    .choice.correct { background: #dff6e8; border: 2px solid #58be84; }
-    .choice.wrong { background: #ffe2df; border: 2px solid #e97d72; }
+button {
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    transform: translateY(0);
+}
 
-    .feedback {
-      min-height: 106px;
-      background: #fafafa;
-      border: 1.5px dashed #ddd2c7;
-      border-radius: 14px;
-      padding: 14px;
-      line-height: 1.6;
-      color: #4f4540;
-      font-size: 15px;
-      margin-bottom: 14px;
-    }
-    .feedback strong { font-size: 17px; }
-    .feedback .ok { color: var(--green); }
-    .feedback .no { color: var(--red); }
-    .feedback .example {
-      margin-top: 8px;
-      color: #6e645d;
-      font-size: 14px;
-      background: #fff;
-      border-radius: 10px;
-      padding: 8px 10px;
-    }
+#new-game-btn {
+    background: var(--primary-gradient);
+}
 
-    .actions {
-      display: flex;
-      gap: 10px;
-      margin-top: auto;
-    }
-    .btn {
-      flex: 1;
-      border: none;
-      border-radius: 14px;
-      padding: 14px 16px;
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: transform .12s ease, opacity .12s ease;
-    }
-    .btn:hover { transform: translateY(-1px); }
-    .btn:disabled { opacity: 0.55; cursor: default; transform: none; }
-    .btn-primary { background: #ff7b97; color: #fff; }
-    .btn-secondary { background: #edf4ff; color: #406a9b; }
+#check-answer-btn {
+    background: var(--accent-gradient);
+}
 
-    .side {
-      padding: 8px 6px;
-    }
-    .qr-box {
-      display: flex;
-      gap: 22px;
-      align-items: center;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-    }
-    .qr-placeholder {
-      width: 210px;
-      height: 210px;
-      border: 8px solid #2cc15f;
-      background:
-        linear-gradient(90deg, #000 10px, transparent 10px) 0 0/30px 30px,
-        linear-gradient(#000 10px, transparent 10px) 0 0/30px 30px,
-        #fff;
-      position: relative;
-      border-radius: 6px;
-      box-shadow: var(--shadow);
-    }
-    .qr-placeholder::before,
-    .qr-placeholder::after {
-      content: "";
-      position: absolute;
-      width: 54px;
-      height: 54px;
-      border: 10px solid #000;
-      background: #fff;
-    }
-    .qr-placeholder::before { top: 10px; left: 10px; }
-    .qr-placeholder::after { top: 10px; right: 10px; }
-    .qr-center {
-      position: absolute;
-      left: 50%; top: 50%; transform: translate(-50%, -50%);
-      width: 46px; height: 46px; background: #000;
-    }
-    .qr-third {
-      position: absolute;
-      left: 10px; bottom: 10px;
-      width: 54px; height: 54px; border: 10px solid #000; background: #fff;
-    }
+#show-solution-btn {
+    background-color: var(--text-color);
+}
 
-    .guide-text h2 {
-      margin: 0 0 10px;
-      font-size: clamp(28px, 4vw, 52px);
-      line-height: 1.2;
-    }
-    .guide-text p {
-      margin: 0 0 8px;
-      font-size: 17px;
-      color: var(--sub);
-      line-height: 1.7;
-    }
+#final-submit-btn {
+    background: var(--submit-gradient);
+}
 
-    .animals {
-      display: flex;
-      gap: 18px;
-      align-items: flex-end;
-      margin-top: 24px;
-      flex-wrap: wrap;
-    }
-    .animal {
-      flex: 1;
-      min-width: 120px;
-      text-align: center;
-      background: transparent;
-    }
-    .animal .face {
-      font-size: 72px;
-      display: block;
-      line-height: 1;
-      margin-bottom: 8px;
-    }
-    .animal .book {
-      display: inline-block;
-      padding: 10px 14px;
-      border-radius: 18px 18px 8px 8px;
-      font-weight: 800;
-      color: #2f2b29;
-      box-shadow: var(--shadow);
-    }
-    .book.yellow { background: #ffe16b; }
-    .book.green { background: #b8f0ae; }
-    .book.blue { background: #8dc9ff; }
+button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+}
 
-    .result-card {
-      text-align: center;
-      padding: 10px 2px 0;
-    }
-    .badge {
-      display: inline-block;
-      background: #fff5c8;
-      color: #8a6b00;
-      padding: 8px 14px;
-      border-radius: 999px;
-      font-weight: 800;
-      margin-bottom: 14px;
-    }
-    textarea {
-      width: 100%;
-      min-height: 95px;
-      margin-top: 12px;
-      border-radius: 14px;
-      border: 1.5px solid #dbcfc0;
-      padding: 12px;
-      font: inherit;
-      resize: vertical;
-      background: #fffdfa;
-    }
-    .small-note {
-      color: #7b716b;
-      font-size: 13px;
-      margin-top: 8px;
-      line-height: 1.5;
-    }
+button:active:not(:disabled) {
+    transform: translateY(0px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
 
-    @media (max-width: 900px) {
-      .app { grid-template-columns: 1fr; }
-      .side { order: -1; }
-      .guide-text h2 { font-size: 36px; }
-      .phone-inner { min-height: auto; }
+button:disabled {
+    background: var(--grid-border-color);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    opacity: 0.7;
+}
+
+#game-board {
+    display: grid;
+    border: 3px solid var(--grid-sub-border-color);
+    background-color: var(--card-bg-color);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    /* Fixed sizes are removed, will be controlled by JS */
+    transition: width 0.2s, height 0.2s;
+}
+
+/* .grid-* classes are now only for sub-grid border styling */
+
+.cell {
+    border: 1px solid var(--grid-border-color);
+    box-sizing: border-box;
+}
+
+.grid-9 .cell:nth-child(3n) { border-right: 2px solid var(--grid-sub-border-color); }
+.grid-9 .cell:nth-child(n+19):nth-child(-n+27), 
+.grid-9 .cell:nth-child(n+46):nth-child(-n+54) {
+    border-bottom: 2px solid var(--grid-sub-border-color);
+}
+
+.grid-6 .cell:nth-child(3n) { border-right: 2px solid var(--grid-sub-border-color); }
+.grid-6 .cell:nth-child(n+7):nth-child(-n+12), 
+.grid-6 .cell:nth-child(n+19):nth-child(-n+24) { 
+    border-bottom: 2px solid var(--grid-sub-border-color);
+}
+.grid-4 .cell:nth-child(2n) { border-right: 2px solid var(--grid-sub-border-color); }
+.grid-4 .cell:nth-child(n+5):nth-child(-n+8) {
+    border-bottom: 2px solid var(--grid-sub-border-color);
+}
+
+.cell input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    text-align: center;
+    font-size: 1.5em;
+    padding: 0;
+    background-color: transparent;
+    color: var(--input-cell-text);
+    font-weight: 700;
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.cell input:focus {
+    outline: none;
+    background-color: var(--primary-color-light);
+}
+
+.cell input.given {
+    background-color: var(--given-cell-bg);
+    color: var(--given-cell-text);
+    font-weight: 400;
+}
+
+.cell input.incorrect {
+    background-color: var(--incorrect-cell-bg);
+    color: var(--incorrect-cell-text);
+}
+
+.cell input.solution-correct {
+    color: var(--solution-flash-text) !important;
+    animation: temporary-flash 2s ease-in-out;
+}
+
+.cell input.solution-incorrect {
+    color: var(--incorrect-cell-text) !important;
+    animation: temporary-flash 2s ease-in-out;
+}
+
+@keyframes temporary-flash {
+    0%, 100% {
+        opacity: 0.7;
     }
-    @media (max-width: 480px) {
-      .choices { grid-template-columns: 1fr; }
-      .phone { padding: 12px; border-width: 8px; }
-      .phone-inner { padding: 14px; }
-      .status { flex-direction: column; }
-      .qr-placeholder { width: 160px; height: 160px; }
-      .animals { justify-content: center; }
+    50% {
+        opacity: 1;
     }
-  </style>
+}
+
+
+/* Theme Switcher */
+.theme-switcher { display: flex; align-items: center; gap: 10px; }
+.theme-toggle-checkbox { display: none; }
+.theme-toggle-label {
+    width: 50px; height: 26px; background-color: var(--grid-sub-border-color);
+    border-radius: 13px; position: relative; cursor: pointer; transition: background-color 0.3s;
+}
+.theme-toggle-label::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 20px; height: 20px; background-color: white; border-radius: 50%;
+    transition: transform 0.3s;
+}
+.theme-toggle-checkbox:checked + .theme-toggle-label { background-color: var(--primary-color); }
+.theme-toggle-checkbox:checked + .theme-toggle-label::after { transform: translateX(24px); }
+
+/* Win Message & Fireworks */
+#win-message {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex; justify-content: center; align-items: center;
+    flex-direction: column; z-index: 100;
+    opacity: 0; pointer-events: none; transition: opacity 0.5s;
+}
+
+#win-message:not(.hidden) {
+    opacity: 1;
+    pointer-events: all;
+}
+
+#win-message p {
+    color: white;
+    font-size: 3.5em;
+    font-weight: 700;
+    text-shadow: 0 0 10px #000, 0 0 20px #000;
+}
+
+.firework {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    opacity: 0;
+    /* animation is now set by JS to allow for delays */
+}
+
+@keyframes firework-animation {
+    0% { transform: translateY(20vh) scale(0.5); opacity: 1; }
+    50% { opacity: 1; }
+    100% { transform: translateY(-20vh) scale(1.5); opacity: 0; }
+}
+
+.hidden {
+    display: none;
+}
+    </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="app">
-      <section class="phone">
-        <div class="phone-inner" id="screen">
-          <div class="title">
-            <h1>신조어 퀴즈</h1>
-            <p>요즘 아이들이 쓰는 신조어를 맞혀 보세요!</p>
-          </div>
-
-          <div class="status">
-            <div class="pill" id="progressText">문제: 1/10</div>
-            <div class="pill" id="scoreText">점수: 0점</div>
-          </div>
-
-          <div class="card">
-            <div class="qno" id="qNo">Q1</div>
-            <div class="word" id="word">갑분싸</div>
-            <div class="hint" id="hint">갑자기 분위기가 00해졌다</div>
-          </div>
-
-          <div class="choices" id="choices"></div>
-          <div class="feedback" id="feedback">정답을 눌러 보세요. ⭕</div>
-
-          <div class="actions">
-            <button class="btn btn-secondary" id="restartBtn">처음부터</button>
-            <button class="btn btn-primary" id="nextBtn" disabled>다음 문제</button>
-          </div>
+    <header class="app-header">
+        <h1>스도쿠 게임</h1>
+        <div class="theme-switcher">
+            <label for="theme-toggle" class="theme-label">다크 모드</label>
+            <input type="checkbox" id="theme-toggle" class="theme-toggle-checkbox">
+            <label for="theme-toggle" class="theme-toggle-label"></label>
         </div>
-      </section>
-
-      <aside class="side">
-        <div class="qr-box">
-          <div class="qr-placeholder" aria-hidden="true">
-            <div class="qr-center"></div>
-            <div class="qr-third"></div>
-          </div>
-          <div class="guide-text">
-            <h2>신조어 퀴즈를 풀며<br>문제를 맞추고<br>소감을 남겨봅시다. ✨</h2>
-            <p>• 20개 단어 중 10문제가 무작위로 출제돼요.</p>
-            <p>• 문제를 풀면 뜻과 예문을 바로 확인할 수 있어요.</p>
-            <p>• 마지막에는 결과와 소감을 적을 수 있어요.</p>
-          </div>
+    </header>
+    
+    <div class="controls">
+        <div class="select-group">
+            <label for="grid-size">크기:</label>
+            <select id="grid-size">
+                <option value="4">4x4</option>
+                <option value="6">6x6</option>
+                <option value="9" selected>9x9</option>
+            </select>
         </div>
-
-        <div class="animals">
-          <div class="animal"><span class="face">🐻</span><span class="book yellow">읽는 중</span></div>
-          <div class="animal"><span class="face">🐰</span><span class="book green">집중!</span></div>
-          <div class="animal"><span class="face">🐱</span><span class="book blue">도전!</span></div>
+        <div class="select-group">
+            <label for="difficulty">난이도:</label>
+            <select id="difficulty">
+                <option value="easy">하</option>
+                <option value="medium" selected>중</option>
+                <option value="hard">상</option>
+            </select>
         </div>
-      </aside>
+        <button id="new-game-btn">새 게임</button>
+        <button id="check-answer-btn">정답 확인</button>
+        <button id="show-solution-btn">정답 보기</button>
+        <button id="final-submit-btn">최종 제출</button>
     </div>
-  </div>
 
-  <script>
-    const QUESTION_COUNT = 10;
-    const bank = [
-      { term: "갑분싸", hint: "갑자기 분위기가 00해졌다", answer: "갑자기 분위기가 싸해짐", options: ["갑자기 분위기가 싸해짐", "가볍게 분위기가 좋아짐", "이상하게 웃긴 상황", "조용히 쉬는 시간"], example: "내가 엉뚱한 말을 했더니 갑분싸가 됐어." },
-      { term: "TMI", hint: "필요 이상으로 자세한 정보", answer: "필요 이상으로 자세한 정보", options: ["필요 이상으로 자세한 정보", "오늘의 중요한 정보", "친구끼리만 아는 말", "시험에 나오는 정보"], example: "TMI이지만 나는 떡볶이를 세 번이나 먹었어." },
-      { term: "내돈내산", hint: "누가 산 걸까요?", answer: "내 돈으로 내가 산 것", options: ["내 돈으로 내가 산 것", "내 동생이 내가 산 것", "내가 돈을 내고 친구가 산 것", "엄마가 사 준 것"], example: "이 필통은 광고 아니고 내돈내산이야." },
-      { term: "오운완", hint: "오늘 + 운동 + 완료", answer: "오늘 운동 완료", options: ["오늘 운동 완료", "오전에 운동 완료", "오늘 운이 완전 좋음", "운동을 오래 하면 완벽"], example: "학교 끝나고 줄넘기 100번! 오운완!" },
-      { term: "많관부", hint: "줄임말이에요", answer: "많은 관심 부탁드립니다", options: ["많은 관심 부탁드립니다", "많이 관찰해 주세요", "많이 관리해 주세요", "많이 간식 부탁해요"], example: "우리 모둠 발표 많관부!" },
-      { term: "무물", hint: "질문과 관계 있어요", answer: "무엇이든 물어보세요", options: ["무엇이든 물어보세요", "무서운 물건", "물 마시는 시간", "무언가를 물리침"], example: "오늘 쉬는 시간에 무물 받을게!" },
-      { term: "찐텐", hint: "가짜가 아니에요", answer: "진짜로 신난 상태", options: ["진짜로 신난 상태", "조용히 있는 상태", "실수해서 긴장한 상태", "화가 많이 난 상태"], example: "체육 시간에 우리 팀이 이겨서 다들 찐텐이었어." },
-      { term: "억텐", hint: "억지 + 텐션", answer: "억지로 신난 척함", options: ["억지로 신난 척함", "매우 크게 화냄", "정말 신나서 소리침", "긴장해서 말을 못함"], example: "조금 피곤했지만 친구 앞에서는 억텐으로 웃었어." },
-      { term: "현타", hint: "현실을 느끼는 순간", answer: "갑자기 현실을 깨닫고 허무해짐", options: ["갑자기 현실을 깨닫고 허무해짐", "현재 시간이 타이트함", "현명한 타이밍", "활동이 재미있어짐"], example: "숙제를 미루다가 밤이 되니 현타가 왔어." },
-      { term: "갓생", hint: "정말 멋지게 사는 모습", answer: "부지런하고 계획적으로 사는 생활", options: ["부지런하고 계획적으로 사는 생활", "게임을 아주 잘하는 생활", "친구와 많이 노는 생활", "하루 종일 쉬는 생활"], example: "일찍 자고 책 읽고 운동하는 갓생을 살고 싶어." },
-      { term: "중꺾마", hint: "긴 문장의 줄임말", answer: "중요한 것은 꺾이지 않는 마음", options: ["중요한 것은 꺾이지 않는 마음", "중간에 꺾으면 마음이 편함", "중요한 꺾은선그래프", "중심을 꺾지 말자"], example: "시험이 어려워도 중꺾마로 끝까지 해 보자!" },
-      { term: "알잘딱깔센", hint: "알아서 + 잘 + 딱 + 깔끔 + 센스", answer: "알아서 잘 딱 깔끔하고 센스 있게", options: ["알아서 잘 딱 깔끔하고 센스 있게", "알림장을 잘 꾸미는 선생님", "알맞고 잘 달리는 센터", "알아서 공부를 많이 하자"], example: "준비물은 알잘딱깔센하게 챙겨 와." },
-      { term: "스불재", hint: "누가 불렀을까요?", answer: "스스로 불러온 재앙", options: ["스스로 불러온 재앙", "스스로 불편한 재미", "스트레스를 불태우는 재주", "스무디 불고기 재료"], example: "숙제를 안 해 놓고 놀아서 스불재가 됐어." },
-      { term: "별다줄", hint: "줄임말을 말하는 줄임말", answer: "별걸 다 줄인다", options: ["별걸 다 줄인다", "별로 다정하지 않다", "별을 다르게 줄 세운다", "별이 다 사라진다"], example: "이 단어도 줄였다고? 정말 별다줄이네!" },
-      { term: "킹받네", hint: "재미있게 짜증 날 때", answer: "아주 약 오르거나 짜증 난다", options: ["아주 약 오르거나 짜증 난다", "왕처럼 멋지다", "기분이 평화롭다", "웃겨서 참을 수 없다"], example: "친구가 바로 앞에서 과자를 혼자 먹으니 좀 킹받네." },
-      { term: "폼 미쳤다", hint: "실력·상태를 말해요", answer: "실력이나 상태가 매우 좋다", options: ["실력이나 상태가 매우 좋다", "정신없이 바쁘다", "옷차림이 이상하다", "화가 많이 났다"], example: "오늘 우리 반 축구팀 폼 미쳤다!" },
-      { term: "느좋", hint: "느낌이…?", answer: "느낌이 좋다", options: ["느낌이 좋다", "늦게 와서 좋다", "늘 조용하다", "느리지만 정확하다"], example: "새로 꾸민 교실 분위기가 느좋이다." },
-      { term: "추구미", hint: "내가 추구하는 모습", answer: "내가 닮고 싶거나 추구하는 분위기", options: ["내가 닮고 싶거나 추구하는 분위기", "친구와 다투는 마음", "숙제를 줄이고 싶은 마음", "중요한 비밀 메모"], example: "내 추구미는 차분하고 친절한 사람이야." },
-      { term: "캘박", hint: "캘린더와 관계 있어요", answer: "일정을 캘린더에 바로 기록함", options: ["일정을 캘린더에 바로 기록함", "박수를 크게 침", "학교 가방을 꾸밈", "계획을 몰래 바꿈"], example: "학예회 날짜를 잊지 않게 바로 캘박했어." },
-      { term: "럭키비키", hint: "좋은 쪽으로 생각해요", answer: "어려운 상황도 긍정적으로 받아들이는 태도", options: ["어려운 상황도 긍정적으로 받아들이는 태도", "행운을 빌어 주는 인사", "운동 경기에서 이기는 비법", "정답을 빨리 맞히는 방법"], example: "비가 와서 소풍이 취소됐지만 실내 놀이를 해서 럭키비키야!" }
-    ];
+    <main>
+        <div id="game-board" class="grid-9"></div>
+    </main>
 
-    let quiz = [];
-    let current = 0;
-    let score = 0;
-    let answered = false;
+    <div id="win-message" class="hidden">
+        <div class="firework"></div><div class="firework"></div><div class="firework"></div>
+        <div class="firework"></div><div class="firework"></div><div class="firework"></div>
+        <div class="firework"></div><div class="firework"></div><div class="firework"></div>
+        <div class="firework"></div><div class="firework"></div><div class="firework"></div>
+        <p>정답입니다!</p>
+    </div>
 
-    let progressText = document.getElementById('progressText');
-    let scoreText = document.getElementById('scoreText');
-    let qNo = document.getElementById('qNo');
-    let word = document.getElementById('word');
-    let hint = document.getElementById('hint');
-    let choicesBox = document.getElementById('choices');
-    let feedback = document.getElementById('feedback');
-    let nextBtn = document.getElementById('nextBtn');
-    let restartBtn = document.getElementById('restartBtn');
-    const screen = document.getElementById('screen');
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const gridSizeSelect = document.getElementById('grid-size');
+    const difficultySelect = document.getElementById('difficulty');
+    const newGameBtn = document.getElementById('new-game-btn');
+    const checkAnswerBtn = document.getElementById('check-answer-btn');
+    const showSolutionBtn = document.getElementById('show-solution-btn');
+    const finalSubmitBtn = document.getElementById('final-submit-btn');
+    const controlsDiv = document.querySelector('.controls');
+    const gameBoard = document.getElementById('game-board');
+    const winMessage = document.getElementById('win-message');
+    const themeToggle = document.getElementById('theme-toggle');
 
-    function shuffle(arr) {
-      const copy = [...arr];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
-    }
+    let currentGridSize = 9;
+    let currentDifficulty = 'medium';
+    let solution = [];
+    let puzzle = [];
 
-    function getLevelText(score) {
-      if (score >= 9) return { label: '신조어 박사 🎓', text: '정말 대단해요! 요즘 말에 아주 강하군요.' };
-      if (score >= 7) return { label: '신조어 탐험가 🔎', text: '아주 잘했어요! 새 말에 대한 감각이 좋아요.' };
-      if (score >= 5) return { label: '신조어 연습생 🌱', text: '좋아요! 몇 개만 더 익히면 금방 실력이 늘어요.' };
-      return { label: '신조어 새싹 🌼', text: '괜찮아요! 다시 도전하면 훨씬 더 잘할 수 있어요.' };
-    }
-
-    function startQuiz() {
-      quiz = shuffle(bank).slice(0, QUESTION_COUNT).map(q => ({ ...q, shuffledOptions: shuffle(q.options) }));
-      current = 0;
-      score = 0;
-      answered = false;
-      renderQuestion();
-    }
-
-    function renderQuestion() {
-      const q = quiz[current];
-      answered = false;
-      progressText.textContent = `문제: ${current + 1}/${quiz.length}`;
-      scoreText.textContent = `점수: ${score}점`;
-      qNo.textContent = `Q${current + 1}`;
-      word.textContent = q.term;
-      hint.textContent = q.hint;
-      feedback.innerHTML = '정답을 눌러 보세요. ⭕';
-      nextBtn.disabled = true;
-
-      choicesBox.innerHTML = '';
-      q.shuffledOptions.forEach(option => {
-        const btn = document.createElement('button');
-        btn.className = 'choice';
-        btn.textContent = option;
-        btn.addEventListener('click', () => selectAnswer(btn, option));
-        choicesBox.appendChild(btn);
-      });
-    }
-
-    function selectAnswer(button, selected) {
-      if (answered) return;
-      answered = true;
-      const q = quiz[current];
-      const buttons = [...document.querySelectorAll('.choice')];
-
-      buttons.forEach(btn => {
-        btn.disabled = true;
-        if (btn.textContent === q.answer) btn.classList.add('correct');
-      });
-
-      if (selected === q.answer) {
-        score += 1;
-        button.classList.add('correct');
-        feedback.innerHTML = `<strong class="ok">⭕ 정답!</strong><br><b>${q.term}</b>은(는) <b>"${q.answer}"</b>이라는 뜻이에요.<div class="example">예문: ${q.example}</div>`;
-      } else {
-        button.classList.add('wrong');
-        feedback.innerHTML = `<strong class="no">❌ 아쉬워요!</strong><br><b>${q.term}</b>의 뜻은 <b>"${q.answer}"</b>이에요.<div class="example">예문: ${q.example}</div>`;
-      }
-
-      scoreText.textContent = `점수: ${score}점`;
-      nextBtn.disabled = false;
-      nextBtn.textContent = current === quiz.length - 1 ? '결과 보기' : '다음 문제';
-    }
-
-    function showResult() {
-      const level = getLevelText(score);
-      progressText.textContent = `완료: ${quiz.length}/${quiz.length}`;
-      scoreText.textContent = `최종 점수: ${score}점`;
-
-      screen.innerHTML = `
-        <div class="title">
-          <h1>퀴즈 완료!</h1>
-          <p>신조어 퀴즈를 모두 풀었어요.</p>
-        </div>
-        <div class="result-card">
-          <div class="badge">${level.label}</div>
-          <div class="card" style="min-height:auto; padding:28px 18px;">
-            <div class="qno">최종 결과</div>
-            <div class="word">${score} / ${quiz.length}</div>
-            <div class="hint">${level.text}</div>
-          </div>
-          <div class="feedback" style="text-align:left; min-height:auto;">
-            <strong>오늘 새롭게 알게 된 신조어 또는 소감을 적어 보세요.</strong>
-            <textarea id="reflection" placeholder="예) ‘알잘딱깔센’의 뜻을 처음 알았어요. 친구들과 재미있게 풀었어요!"></textarea>
-            <div class="small-note">원하면 이 내용을 복사해서 학습 활동지에 옮겨 적을 수 있어요.</div>
-          </div>
-          <div class="actions">
-            <button class="btn btn-secondary" id="copyBtn">소감 복사</button>
-            <button class="btn btn-primary" id="restartBtn2">다시 하기</button>
-          </div>
-        </div>
-      `;
-
-      document.getElementById('restartBtn2').addEventListener('click', rebuildQuizUI);
-      document.getElementById('copyBtn').addEventListener('click', async () => {
-        const text = document.getElementById('reflection').value.trim();
-        if (!text) {
-          alert('먼저 소감을 적어 주세요.');
-          return;
-        }
-        try {
-          await navigator.clipboard.writeText(text);
-          alert('소감을 복사했어요!');
-        } catch {
-          alert('복사 기능을 사용할 수 없어요. 직접 선택해서 복사해 주세요.');
-        }
-      });
-    }
-
-    function rebuildQuizUI() {
-      screen.innerHTML = `
-        <div class="title">
-          <h1>신조어 퀴즈</h1>
-          <p>요즘 아이들이 쓰는 신조어를 맞혀 보세요!</p>
-        </div>
-        <div class="status">
-          <div class="pill" id="progressText">문제: 1/10</div>
-          <div class="pill" id="scoreText">점수: 0점</div>
-        </div>
-        <div class="card">
-          <div class="qno" id="qNo">Q1</div>
-          <div class="word" id="word">갑분싸</div>
-          <div class="hint" id="hint">갑자기 분위기가 00해졌다</div>
-        </div>
-        <div class="choices" id="choices"></div>
-        <div class="feedback" id="feedback">정답을 눌러 보세요. ⭕</div>
-        <div class="actions">
-          <button class="btn btn-secondary" id="restartBtn">처음부터</button>
-          <button class="btn btn-primary" id="nextBtn" disabled>다음 문제</button>
-        </div>
-      `;
-
-      bindElements();
-      startQuiz();
-    }
-
-    function bindElements() {
-      progressText = document.getElementById('progressText');
-      scoreText = document.getElementById('scoreText');
-      qNo = document.getElementById('qNo');
-      word = document.getElementById('word');
-      hint = document.getElementById('hint');
-      choicesBox = document.getElementById('choices');
-      feedback = document.getElementById('feedback');
-      nextBtn = document.getElementById('nextBtn');
-      restartBtn = document.getElementById('restartBtn');
-      nextBtn.addEventListener('click', () => {
-        if (current < quiz.length - 1) {
-          current += 1;
-          renderQuestion();
+    // --- Sudoku Generation Logic ---
+    function isValid(grid, row, col, num) {
+        const size = grid.length;
+        
+        let subGridRows, subGridCols;
+        if (size === 4) {
+            subGridRows = 2; subGridCols = 2;
+        } else if (size === 6) {
+            subGridRows = 2; subGridCols = 3; // Correct for 6x6 Sudoku
+        } else if (size === 9) {
+            subGridRows = 3; subGridCols = 3;
         } else {
-          showResult();
+            // Fallback for unexpected sizes, though not expected to be hit
+            subGridRows = Math.sqrt(size);
+            subGridCols = Math.sqrt(size);
         }
-      });
-      restartBtn.addEventListener('click', startQuiz);
+
+        // Check row and column
+        for (let i = 0; i < size; i++) {
+            if (grid[row][i] === num || grid[i][col] === num) return false;
+        }
+        
+        // Check subgrid
+        const startRow = Math.floor(row / subGridRows) * subGridRows;
+        const startCol = Math.floor(col / subGridCols) * subGridCols;
+        for (let i = 0; i < subGridRows; i++) {
+            for (let j = 0; j < subGridCols; j++) {
+                if (grid[startRow + i][startCol + j] === num) return false;
+            }
+        }
+        return true;
     }
 
-    // Initial bind
-    bindElements();
-    startQuiz();
-  </script>
+    function fillGrid(grid) {
+        const size = grid.length;
+        const emptyCell = findEmpty(grid);
+        if (!emptyCell) return true;
+        const { row, col } = emptyCell;
+        const numbers = Array.from({ length: size }, (_, i) => i + 1);
+        shuffle(numbers);
+        for (const num of numbers) {
+            if (isValid(grid, row, col, num)) {
+                grid[row][col] = num;
+                if (fillGrid(grid)) return true;
+                grid[row][col] = 0;
+            }
+        }
+        return false;
+    }
+
+    function findEmpty(grid) {
+        const size = grid.length;
+        for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) {
+                if (grid[r][c] === 0) return { row: r, col: c };
+            }
+        }
+        return null;
+    }
+
+    function countSolutions(grid) {
+        const size = grid.length;
+        const emptyCell = findEmpty(grid);
+        if (!emptyCell) return 1;
+        const { row, col } = emptyCell;
+        let count = 0;
+        for (let num = 1; num <= size; num++) {
+            if (isValid(grid, row, col, num)) {
+                grid[row][col] = num;
+                count += countSolutions(grid);
+                grid[row][col] = 0;
+                if (count > 1) return 2;
+            }
+        }
+        return count;
+    }
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function generatePuzzle(size, difficulty) {
+        const grid = Array.from({ length: size }, () => Array(size).fill(0));
+        fillGrid(grid);
+        solution = grid.map(row => [...row]);
+        const difficultyLevels = { 4: { 'easy': 4, 'medium': 6, 'hard': 8 }, 6: { 'easy': 10, 'medium': 15, 'hard': 20 }, 9: { 'easy': 30, 'medium': 40, 'hard': 50 } };
+        let cellsToRemove = difficultyLevels[size][difficulty] || difficultyLevels[size]['medium'];
+        puzzle = solution.map(row => [...row]);
+        const allCells = [];
+        for(let r=0; r<size; r++) { for(let c=0; c<size; c++) { allCells.push({r,c}); } }
+        shuffle(allCells);
+        let removedCount = 0;
+        for(const cell of allCells) {
+            if(removedCount >= cellsToRemove) break;
+            const {r, c} = cell;
+            const temp = puzzle[r][c];
+            puzzle[r][c] = 0;
+            const tempGrid = puzzle.map(row => [...row]);
+            if (countSolutions(tempGrid) !== 1) {
+                puzzle[r][c] = temp;
+            } else {
+                removedCount++;
+            }
+        }
+    }
+
+    function adjustGridSize() {
+        if (!controlsDiv || !gameBoard) return;
+        const controlsWidth = controlsDiv.offsetWidth * 0.95;
+        const cellSize = Math.floor(controlsWidth / currentGridSize);
+        const newBoardSize = cellSize * currentGridSize;
+
+        gameBoard.style.width = `${newBoardSize}px`;
+        gameBoard.style.height = `${newBoardSize}px`;
+        gameBoard.style.gridTemplateColumns = `repeat(${currentGridSize}, 1fr)`;
+        gameBoard.style.gridTemplateRows = `repeat(${currentGridSize}, 1fr)`;
+
+        const inputs = gameBoard.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.style.fontSize = `${cellSize * 0.5}px`;
+        });
+    }
+
+    function createBoard() {
+        gameBoard.innerHTML = '';
+        gameBoard.className = `grid-${currentGridSize}`;
+        winMessage.classList.add('hidden');
+        for (let i = 0; i < currentGridSize * currentGridSize; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            const input = document.createElement('input');
+            input.setAttribute('type', 'text');
+            input.setAttribute('maxlength', '1');
+            const row = Math.floor(i / currentGridSize);
+            const col = i % currentGridSize;
+            input.dataset.row = row;
+            input.dataset.col = col;
+
+            if (puzzle && puzzle[row] && puzzle[row][col] !== undefined) {
+                const value = puzzle[row][col];
+                if (value !== 0) {
+                    input.value = value;
+                    input.readOnly = true;
+                    input.classList.add('given');
+                } else {
+                    input.addEventListener('input', (e) => {
+                        e.target.value = e.target.value.replace(/[^1-9]/g, '');
+                    });
+                }
+            }
+            cell.appendChild(input);
+            gameBoard.appendChild(cell);
+        }
+        adjustGridSize();
+    }
+
+    function checkCurrentAnswers() {
+        const inputs = gameBoard.querySelectorAll('input:not(.given)');
+        inputs.forEach((input) => {
+            input.classList.remove('incorrect');
+            const userValue = parseInt(input.value, 10);
+            if(userValue) {
+                const row = parseInt(input.dataset.row, 10);
+                const col = parseInt(input.dataset.col, 10);
+                if(userValue !== solution[row][col]){
+                    input.classList.add('incorrect');
+                }
+            }
+        });
+    }
+
+    function finalSubmit() {
+        const inputs = gameBoard.querySelectorAll('input');
+        let isCorrect = true;
+        let isComplete = true;
+        inputs.forEach((input) => {
+            const row = parseInt(input.dataset.row, 10);
+            const col = parseInt(input.dataset.col, 10);
+            const solutionValue = solution[row][col];
+            const userValue = parseInt(input.value, 10);
+            input.classList.remove('incorrect');
+            if (!input.value || userValue === 0) isComplete = false;
+            if (input.value && userValue !== solutionValue) {
+                isCorrect = false;
+                input.classList.add('incorrect');
+            }
+        });
+
+        if (!isComplete) {
+            alert('아직 모든 칸이 채워지지 않았습니다.');
+            return;
+        }
+
+        if (isComplete && isCorrect) {
+            const winColors = ['#3498db', '#e74c3c', '#f1c40f', '#2ecc71', '#9b59b6', '#1abc9c', '#e67e22'];
+            winMessage.classList.remove('hidden');
+            const fireworks = winMessage.querySelectorAll('.firework');
+            fireworks.forEach(fw => {
+                const randomColor = winColors[Math.floor(Math.random() * winColors.length)];
+                fw.style.backgroundColor = randomColor;
+                fw.style.top = `${Math.random() * 90 + 5}%`;
+                fw.style.left = `${Math.random() * 90 + 5}%`;
+                fw.style.animation = 'none';
+                fw.offsetHeight;
+                fw.style.animation = `firework-animation 2.5s ease-out forwards`;
+                fw.style.animationDelay = `${Math.random() * 2}s`;
+            });
+            setTimeout(() => {
+                winMessage.classList.add('hidden');
+                fireworks.forEach(fw => {
+                    fw.style.animation = '';
+                    fw.style.animationDelay = '';
+                });
+            }, 6000);
+        } else {
+            alert('틀린 부분이 있습니다. 확인해보세요!');
+        }
+    }
+
+    let isShowingSolution = false;
+    function showSolution() {
+        if (isShowingSolution) return;
+
+        isShowingSolution = true;
+        showSolutionBtn.disabled = true;
+        checkAnswerBtn.disabled = true;
+        finalSubmitBtn.disabled = true;
+
+        const inputs = gameBoard.querySelectorAll('input');
+        const originalValues = [];
+        inputs.forEach(input => {
+            originalValues.push(input.value);
+            if (!input.readOnly) {
+                const row = parseInt(input.dataset.row, 10);
+                const col = parseInt(input.dataset.col, 10);
+                const userValue = parseInt(input.value, 10);
+                const solutionValue = solution[row][col];
+
+                input.classList.remove('incorrect');
+
+                if (input.value && userValue === solutionValue) {
+                    input.classList.add('solution-correct');
+                } else {
+                    input.value = solutionValue;
+                    input.classList.add('solution-incorrect');
+                }
+            }
+        });
+
+        setTimeout(() => {
+            inputs.forEach((input, index) => {
+                input.value = originalValues[index];
+                input.classList.remove('solution-correct');
+                input.classList.remove('solution-incorrect');
+            });
+            checkCurrentAnswers();
+            
+            isShowingSolution = false;
+            showSolutionBtn.disabled = false;
+            checkAnswerBtn.disabled = false;
+            finalSubmitBtn.disabled = false;
+        }, 2000);
+    }
+
+    function newGame() {
+        if(newGameBtn) {
+            newGameBtn.disabled = true;
+            newGameBtn.textContent = '생성중...';
+        }
+        currentGridSize = parseInt(gridSizeSelect.value, 10);
+        currentDifficulty = difficultySelect.value;
+        
+        setTimeout(() => {
+            generatePuzzle(currentGridSize, currentDifficulty);
+            createBoard();
+            if(newGameBtn) {
+                newGameBtn.disabled = false;
+                newGameBtn.textContent = '새 게임';
+            }
+        }, 50);
+    }
+
+    function applyTheme(theme) {
+        document.body.className = theme;
+        localStorage.setItem('sudoku_theme', theme);
+    }
+
+    if (themeToggle) {
+        themeToggle.addEventListener('change', (e) => {
+            applyTheme(e.target.checked ? 'dark-mode' : 'light-mode');
+        });
+        const savedTheme = localStorage.getItem('sudoku_theme');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (savedTheme) {
+            themeToggle.checked = savedTheme === 'dark-mode';
+            applyTheme(savedTheme);
+        } else if (prefersDark) {
+            themeToggle.checked = true;
+            applyTheme('dark-mode');
+        }
+    }
+
+    if(newGameBtn) newGameBtn.addEventListener('click', newGame);
+    if(checkAnswerBtn) checkAnswerBtn.addEventListener('click', checkCurrentAnswers);
+    if(showSolutionBtn) showSolutionBtn.addEventListener('click', showSolution);
+    if(finalSubmitBtn) finalSubmitBtn.addEventListener('click', finalSubmit);
+    if(gridSizeSelect) gridSizeSelect.addEventListener('change', newGame);
+    if(difficultySelect) difficultySelect.addEventListener('change', newGame);
+    
+    window.addEventListener('resize', adjustGridSize);
+
+    newGame();
+});
+    </script>
 </body>
 </html>
